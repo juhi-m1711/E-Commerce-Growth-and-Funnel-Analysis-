@@ -1,0 +1,29 @@
+-- 1. WEBSITE CONVERSION FUNNEL ANALYSIS
+WITH funnel_steps AS (
+    SELECT
+        ws.website_session_id,
+        MAX(CASE 
+			WHEN wp.pageview_url = '/products' THEN 1 
+			ELSE 0 
+			END
+	) AS product_viewed,
+        MAX(CASE 
+			WHEN o.order_id IS NOT NULL THEN 1 
+			ELSE 0 
+			END
+	) AS order_placed
+    FROM website_sessions AS ws
+    LEFT JOIN website_pageviews AS wp
+        ON ws.website_session_id = wp.website_session_id
+    LEFT JOIN orders AS o
+        ON ws.website_session_id = o.website_session_id
+    GROUP BY ws.website_session_id
+)
+
+SELECT
+    COUNT(*) AS total_sessions,
+    SUM(product_viewed) AS product_page_sessions,
+    SUM(order_placed) AS order_sessions,
+    ROUND(SUM(product_viewed)::decimal / COUNT(*) * 100, 2) AS session_to_product_cvr,
+    ROUND(SUM(order_placed)::decimal / SUM(product_viewed) * 100, 2) AS product_to_order_cvr
+FROM funnel_steps;

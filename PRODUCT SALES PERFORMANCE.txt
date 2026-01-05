@@ -1,0 +1,19 @@
+-- 4. PRODUCT SALES PERFORMANCE
+WITH product_sales_performance AS (
+	SELECT
+	    p.product_name,
+	    COUNT(oi.order_item_id) AS units_sold,
+	    SUM(oi.price_usd) AS product_revenue,
+	    ROUND(
+	        SUM(oi.price_usd) /
+	        (SELECT SUM(price_usd) FROM order_items) * 100, 2
+	    ) AS revenue_contribution_percent
+	FROM products AS p
+	JOIN order_items AS oi
+    	ON p.product_id = oi.product_id
+	GROUP BY p.product_name
+)
+
+SELECT * 
+FROM product_sales_performance
+ORDER BY product_revenue DESC;

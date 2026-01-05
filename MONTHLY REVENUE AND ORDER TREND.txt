@@ -1,0 +1,14 @@
+-- 3. MONTHLY REVENUE AND ORDER TREND ANALYSIS
+WITH revenue_order_trend AS (
+	SELECT
+	    DATE_TRUNC('month', o.created_at) AS month,
+	    COUNT(DISTINCT o.order_id) AS total_orders,
+	    SUM(o.price_usd) AS total_revenue,
+	    ROUND(AVG(o.price_usd), 2) AS average_order_value
+	FROM orders AS o
+	GROUP BY month
+)
+
+SELECT * 
+FROM revenue_order_trend
+ORDER BY month;

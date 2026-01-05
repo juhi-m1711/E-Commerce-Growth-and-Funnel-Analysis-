@@ -1,0 +1,24 @@
+-- 5. REFUND AND REVENUE LOSS ANALYSIS
+WITH refund_revenue_analysis AS (
+	SELECT
+	    p.product_name,
+	    COUNT(r.order_item_refund_id) AS total_refunds,
+	    COUNT(oi.order_item_id) AS total_sold,
+	    ROUND(
+	        COUNT(r.order_item_refund_id)::decimal /
+	        COUNT(oi.order_item_id) * 100, 2
+	    ) AS refund_rate_pct,
+	    SUM(oi.price_usd) AS revenue_generated,
+	    SUM(COALESCE(r.refund_amount_usd, 0)) AS revenue_lost
+	FROM order_items AS oi
+	LEFT JOIN order_item_refunds AS r
+    	ON oi.order_item_id = r.order_item_id
+	JOIN products AS p
+    	ON oi.product_id = p.product_id
+	GROUP BY p.product_name
+	HAVING COUNT(oi.order_item_id) > 50
+)
+
+SELECT * 
+FROM refund_revenue_analysis
+ORDER BY refund_rate_pct DESC;

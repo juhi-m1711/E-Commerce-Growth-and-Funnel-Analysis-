@@ -1,0 +1,20 @@
+-- 6. NEW V/S REPEAT CUSTOMER ANALYSIS
+WITH customer_orders AS (
+    SELECT
+        user_id,
+        COUNT(order_id) AS total_orders,
+        SUM(price_usd) AS total_revenue
+    FROM orders
+    GROUP BY user_id
+)
+SELECT
+    CASE
+        WHEN total_orders = 1 THEN 'New Customer'
+        ELSE 'Repeat Customer'
+    END AS customer_type,
+    COUNT(user_id) AS customers,
+    SUM(total_revenue) AS revenue,
+    ROUND(AVG(total_revenue), 2) AS avg_revenue_per_customer
+FROM customer_orders
+GROUP BY customer_type;
+
